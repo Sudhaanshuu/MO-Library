@@ -36,7 +36,7 @@ Molibrary is an open library website designed to provide users with access to a 
 3. **Set up environment variables**:
    Create a `.env` file in the root directory and add the following variables:
    ```env
-   
+   two files
    ```
 
 4. **Run the application**:

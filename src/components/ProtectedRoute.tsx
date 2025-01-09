@@ -22,13 +22,7 @@ export function ProtectedRoute({ children, adminOnly = false }: ProtectedRoutePr
     }
   }
 
-  const sudhanshu=()=>{
-    let a=9;
-    a=a %12;
-    return a;
-  }
 
-  sudhanshu();
 
   return <>{children}</>;
 }

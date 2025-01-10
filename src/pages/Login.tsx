@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Library, LogIn, UserPlus } from 'lucide-react';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -20,63 +21,80 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 relative">
+        <div className="absolute inset-0 bg-primary-800/30 backdrop-blur-xl rounded-2xl transform -skew-y-3"></div>
+        <div className="relative bg-primary-900/50 p-8 rounded-2xl border border-primary-700/50 backdrop-blur-sm">
+          <div className="flex flex-col items-center">
+            <Library className="h-12 w-12 text-primary-400" />
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-primary-200">
+              Access Your Account
+            </h2>
           </div>
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+            <div className="rounded-md shadow-sm -space-y-px">
+              <div>
+                <label htmlFor="email-address" className="sr-only">
+                  Email address
+                </label>
+                <input
+                  id="email-address"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="appearance-none rounded-t-lg relative block w-full px-3 py-2 bg-primary-800/50 border border-primary-700 placeholder-primary-400 text-primary-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="sr-only">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  className="appearance-none rounded-b-lg relative block w-full px-3 py-2 bg-primary-800/50 border border-primary-700 placeholder-primary-400 text-primary-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
 
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-              Sign in
-            </button>
-          </div>
-        </form>
+            <div className="flex flex-col space-y-4">
+              <button
+                type="submit"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transform hover:scale-105 transition-all duration-200"
+              >
+                <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                  <LogIn className="h-5 w-5 text-primary-300 group-hover:text-primary-200" />
+                </span>
+                Sign in
+              </button>
+              
+              <Link
+                to="/register"
+                className="group relative w-full flex justify-center py-2 px-4 border border-primary-600 text-sm font-medium rounded-lg text-primary-200 hover:bg-primary-800/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transform hover:scale-105 transition-all duration-200"
+              >
+                <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                  <UserPlus className="h-5 w-5 text-primary-400 group-hover:text-primary-300" />
+                </span>
+                Create Account
+              </Link>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

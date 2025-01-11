@@ -10,6 +10,7 @@ export const Auth = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
   const { setUser } = useAuthStore();
 
@@ -23,6 +24,7 @@ export const Auth = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
 
     try {
       if (!isLogin) {
@@ -58,7 +60,6 @@ export const Auth = () => {
         
         if (authData.user) {
           try {
-            // First ensure the user exists in the users table
             const { error: insertError } = await supabase
               .from('users')
               .insert([{ 
@@ -66,14 +67,18 @@ export const Auth = () => {
                 email: authData.user.email
               }]);
               
-            if (insertError) throw insertError;
+            if (insertError) {
+              // If it's a duplicate key error, we can ignore it
+              if (!insertError.message.includes('duplicate key')) {
+                throw insertError;
+              }
+            }
 
-            setUser(authData.user);
-            navigate('/');
+            setSuccess('Account created successfully! You can now sign in.');
+            setIsLogin(true);
           } catch (dbError: any) {
-            // If user table insert fails, clean up auth user
-            await supabase.auth.signOut();
-            throw new Error('Failed to create user profile. Please try again.');
+            // If user table insert fails, we can still proceed since the auth user is created
+            console.error('Failed to create user profile:', dbError);
           }
         }
       }
@@ -101,6 +106,12 @@ export const Auth = () => {
         {error && (
           <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-2 rounded-lg">
             {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-green-500/10 border border-green-500/50 text-green-400 px-4 py-2 rounded-lg">
+            {success}
           </div>
         )}
         
@@ -158,7 +169,11 @@ export const Auth = () => {
 
         <div className="text-center">
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError('');
+              setSuccess('');
+            }}
             className="text-purple-400 hover:text-purple-500"
           >
             {isLogin ? 'Need an account? Sign up' : 'Already have an account? Sign in'}

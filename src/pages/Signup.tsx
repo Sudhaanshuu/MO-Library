@@ -23,27 +23,51 @@ const Signup: React.FC = () => {
     setLoading(true);
     
     try {
-      // Sign up the user
+      // Sign up the user with metadata included
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName, // Include full_name in user metadata
+          }
+        }
       });
       
       if (authError) throw authError;
       
+      // Check if we need to update the profile
       if (authData.user) {
-        // Create a profile for the user
-        const { error: profileError } = await supabase
+        // Check if profile exists first
+        const { data: existingProfile } = await supabase
           .from('profiles')
-          .insert([
-            {
-              id: authData.user.id,
-              email,
-              full_name: fullName,
-            },
-          ]);
-        
-        if (profileError) throw profileError;
+          .select('*')
+          .eq('id', authData.user.id)
+          .single();
+          
+        // If profile exists but needs the full name updated
+        if (existingProfile && (!existingProfile.full_name || existingProfile.full_name !== fullName)) {
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ full_name: fullName })
+            .eq('id', authData.user.id);
+            
+          if (updateError) console.error("Error updating profile:", updateError);
+        } 
+        // If profile doesn't exist (shouldn't happen with triggers, but just in case)
+        else if (!existingProfile) {
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert([
+              {
+                id: authData.user.id,
+                email,
+                full_name: fullName,
+              }
+            ]);
+            
+          if (insertError) console.error("Error creating profile:", insertError);
+        }
       }
       
       toast.success('Account created successfully! Please check your email for verification.');
@@ -161,8 +185,6 @@ const Signup: React.FC = () => {
             </button>
           </div>
         </form>
-        
-        
         
         <p className="mt-8 text-center text-sm text-gray-300">
           Already have an account?{' '}

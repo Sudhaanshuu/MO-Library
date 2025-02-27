@@ -230,32 +230,6 @@ const ProfilePage: React.FC = () => {
               </div>
             </form>
             
-            <div className="mt-8 pt-6 border-t border-gray-700">
-              <h3 className="text-lg font-medium mb-4">Account Settings</h3>
-              
-              <div className="space-y-4">
-                <button
-                  type="button"
-                  className="w-full text-left py-2 px-4 rounded-md bg-background-light hover:bg-gray-700 transition-colors"
-                >
-                  Change Password
-                </button>
-                
-                <button
-                  type="button"
-                  className="w-full text-left py-2 px-4 rounded-md bg-background-light hover:bg-gray-700 transition-colors"
-                >
-                  Notification Preferences
-                </button>
-                
-                <button
-                  type="button"
-                  className="w-full text-left py-2 px-4 rounded-md bg-red-900/20 hover:bg-red-900/30 text-red-400 transition-colors"
-                >
-                  Delete Account
-                </button>
-              </div>
-            </div>
           </motion.div>
         </div>
       </div>

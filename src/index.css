@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #8b5cf6;
+  --primary-dark: #7c3aed;
+  --secondary: #ec4899;
+  --background: #0f0f1a;
+  --foreground: #f8fafc;
+  --accent: #f472b6;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  overflow-x: hidden;
+}
+
+.gradient-text {
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+
+.gradient-border {
+  position: relative;
+  border-radius: 0.5rem;
+  background: var(--background);
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: 0.6rem;
+  z-index: -1;
+}
+
+.glass-effect {
+  background: rgba(15, 15, 26, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.neon-shadow {
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+}
+
+.seat {
+  transition: all 0.3s ease;
+}
+
+.seat:hover {
+  transform: translateY(-5px);
+}
+
+.seat.available {
+  background-color: rgba(139, 92, 246, 0.2);
+  border: 1px solid var(--primary);
+}
+
+.seat.booked {
+  background-color: rgba(236, 72, 153, 0.2);
+  border: 1px solid var(--secondary);
+}
+
+.seat.selected {
+  background-color: rgba(139, 92, 246, 0.5);
+  border: 2px solid var(--primary);
+  transform: translateY(-5px);
+}
+
+.seat.your-booking {
+  background-color: rgba(244, 114, 182, 0.3);
+  border: 2px solid var(--accent);
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px rgba(139, 92, 246, 0.5);
+  }
+  to {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.8), 0 0 30px rgba(236, 72, 153, 0.6);
+  }
+}

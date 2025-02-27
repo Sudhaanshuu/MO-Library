@@ -185,7 +185,7 @@ const ProfilePage: React.FC = () => {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="block w-full pl-10 pr-3 py-2 rounded-md bg-background-light border border-gray-700 focus:ring-primary focus:border-primary text-white"
-                    placeholder="John Doe"
+                    placeholder="Sudhanshu"
                   />
                 </div>
               </div>

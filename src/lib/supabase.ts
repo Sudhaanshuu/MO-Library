@@ -15,6 +15,7 @@ export type Profile = {
   full_name: string | null;
   avatar_url: string | null;
   created_at: string;
+  is_admin?: boolean;
 };
 
 export type Seat = {
@@ -32,4 +33,23 @@ export type Booking = {
   end_time: string;
   created_at: string;
   seat?: Seat;
+  profile?: Profile;
+};
+
+export const isAdmin = async (): Promise<boolean> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+    
+    const { data } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single();
+    
+    return data?.is_admin === true;
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    return false;
+  }
 };

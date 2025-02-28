@@ -16,6 +16,7 @@ import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import SeatBooking from './pages/SeatBooking';
 import Profile from './pages/Profile';
+import Admin from './pages/Admin';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -60,6 +61,7 @@ function App() {
           <Route path="/dashboard" element={session ? <Dashboard /> : <Navigate to="/login" />} />
           <Route path="/seat-booking" element={session ? <SeatBooking /> : <Navigate to="/login" />} />
           <Route path="/profile" element={session ? <Profile /> : <Navigate to="/login" />} />
+          <Route path="/admin" element={session ? <Admin /> : <Navigate to="/login" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

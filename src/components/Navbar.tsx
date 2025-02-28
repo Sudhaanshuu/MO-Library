@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Session } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
-import { BookOpen, Menu, X, LogOut, User, BookMarked } from 'lucide-react';
+import { supabase, isAdmin } from '../lib/supabase';
+import { BookOpen, Menu, X, LogOut, User, BookMarked, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface NavbarProps {
@@ -13,6 +13,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ session }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [userIsAdmin, setUserIsAdmin] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,6 +28,19 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (session) {
+      const checkAdminStatus = async () => {
+        const adminStatus = await isAdmin();
+        setUserIsAdmin(adminStatus);
+      };
+      
+      checkAdminStatus();
+    } else {
+      setUserIsAdmin(false);
+    }
+  }, [session]);
 
   const handleSignOut = async () => {
     try {
@@ -70,6 +84,12 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                 <Link to="/seat-booking" className="text-white hover:text-primary transition-colors">
                   Book a Seat
                 </Link>
+                {userIsAdmin && (
+                  <Link to="/admin" className="text-white hover:text-primary transition-colors flex items-center">
+                    <Shield className="w-4 h-4 mr-1" />
+                    Admin
+                  </Link>
+                )}
                 <div className="flex items-center space-x-4">
                   <Link
                     to="/profile"
@@ -148,6 +168,16 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                 >
                   Book a Seat
                 </Link>
+                {userIsAdmin && (
+                  <Link
+                    to="/admin"
+                    className="text-white hover:text-primary transition-colors flex items-center"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Shield className="w-4 h-4 mr-1" />
+                    Admin
+                  </Link>
+                )}
                 <Link
                   to="/profile"
                   className="text-white hover:text-primary transition-colors"

@@ -381,43 +381,58 @@ const SeatBooking: React.FC = () => {
               </div>
               
               <div>
-                <label htmlFor="startTime" className="block text-sm font-medium text-gray-300 mb-2">
-                  Start Time
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Calendar className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="startTime"
-                    type="datetime-local"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 rounded-md bg-background-light border border-gray-700 focus:ring-primary focus:border-primary text-white"
-                    min={formatDateTimeForInput(new Date())}
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label htmlFor="endTime" className="block text-sm font-medium text-gray-300 mb-2">
-                  End Time
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Clock className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="endTime"
-                    type="datetime-local"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 rounded-md bg-background-light border border-gray-700 focus:ring-primary focus:border-primary text-white"
-                    min={startTime}
-                  />
-                </div>
-              </div>
-              
+  <label htmlFor="startTime" className="block text-sm font-medium text-gray-300 mb-2">
+    Start Time
+  </label>
+  <div className="relative">
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <Calendar className="h-5 w-5 text-gray-400" />
+    </div>
+    <input
+      id="startTime"
+      type="datetime-local"
+      value={startTime}
+      onChange={(e) => {
+        const selectedTime = new Date(e.target.value);
+        const hours = selectedTime.getHours();
+        if (hours >= 9 && hours <= 21) {
+          setStartTime(e.target.value);
+        } else {
+          alert("Please select a time between 9 AM and 9 PM");
+        }
+      }}
+      className="block w-full pl-10 pr-3 py-2 rounded-md bg-background-light border border-gray-700 focus:ring-primary focus:border-primary text-white"
+      min={formatDateTimeForInput(new Date())}
+    />
+  </div>
+</div>
+
+<div>
+  <label htmlFor="endTime" className="block text-sm font-medium text-gray-300 mb-2">
+    End Time
+  </label>
+  <div className="relative">
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <Clock className="h-5 w-5 text-gray-400" />
+    </div>
+    <input
+      id="endTime"
+      type="datetime-local"
+      value={endTime}
+      onChange={(e) => {
+        const selectedTime = new Date(e.target.value);
+        const hours = selectedTime.getHours();
+        if (hours >= 9 && hours <= 21) {
+          setEndTime(e.target.value);
+        } else {
+          alert("Please select a time between 9 AM and 9 PM");
+        }
+      }}
+      className="block w-full pl-10 pr-3 py-2 rounded-md bg-background-light border border-gray-700 focus:ring-primary focus:border-primary text-white"
+      min={startTime}
+    />
+  </div>
+</div>
               {selectedSeat ? (
                 <div className="p-4 bg-primary/10 border border-primary/30 rounded-md flex items-start">
                   <Check className="h-5 w-5 text-primary mr-2 mt-0.5" />

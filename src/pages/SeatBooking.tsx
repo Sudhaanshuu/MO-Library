@@ -380,7 +380,7 @@ const SeatBooking: React.FC = () => {
                 </div>
               </div>
               
-              <div>
+<div>
   <label htmlFor="startTime" className="block text-sm font-medium text-gray-300 mb-2">
     Start Time
   </label>
@@ -395,10 +395,13 @@ const SeatBooking: React.FC = () => {
       onChange={(e) => {
         const selectedTime = new Date(e.target.value);
         const hours = selectedTime.getHours();
-        if (hours >= 9 && hours <= 21) {
+        const minutes = selectedTime.getMinutes();
+        
+        // Check if time is between 8:00 AM and 10:00 PM
+        if ((hours > 8 || (hours === 8 && minutes >= 0)) && (hours < 22)) {
           setStartTime(e.target.value);
         } else {
-          alert("Please select a time between 9 AM and 9 PM");
+          toast.error("Please select a time between 8:00 AM and 10:00 PM");
         }
       }}
       className="block w-full pl-10 pr-3 py-2 rounded-md bg-background-light border border-gray-700 focus:ring-primary focus:border-primary text-white"
@@ -422,10 +425,13 @@ const SeatBooking: React.FC = () => {
       onChange={(e) => {
         const selectedTime = new Date(e.target.value);
         const hours = selectedTime.getHours();
-        if (hours >= 9 && hours <= 21) {
+        const minutes = selectedTime.getMinutes();
+        
+        // Check if time is between 8:00 AM and 10:00 PM
+        if ((hours > 8 || (hours === 8 && minutes >= 0)) && (hours < 22 || (hours === 22 && minutes === 0))) {
           setEndTime(e.target.value);
         } else {
-          alert("Please select a time between 9 AM and 9 PM");
+          toast.error("Please select a time between 8:00 AM and 10:00 PM");
         }
       }}
       className="block w-full pl-10 pr-3 py-2 rounded-md bg-background-light border border-gray-700 focus:ring-primary focus:border-primary text-white"
@@ -433,6 +439,7 @@ const SeatBooking: React.FC = () => {
     />
   </div>
 </div>
+              
               {selectedSeat ? (
                 <div className="p-4 bg-primary/10 border border-primary/30 rounded-md flex items-start">
                   <Check className="h-5 w-5 text-primary mr-2 mt-0.5" />

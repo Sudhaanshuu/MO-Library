@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import { Calendar, Clock, Info, Check, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, Info, Check, AlertCircle, CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { Seat, Booking } from '../lib/supabase';
+import { initiateRazorpayPayment } from '../lib/razorpay';
 
 const SeatBooking: React.FC = () => {
   const [seats, setSeats] = useState<Seat[]>([]);
@@ -16,6 +17,8 @@ const SeatBooking: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [userBookings, setUserBookings] = useState<Booking[]>([]);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,6 +27,17 @@ const SeatBooking: React.FC = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           setUserId(user.id);
+          
+          // Fetch user profile for payment details
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+            
+          if (profileData) {
+            setUserProfile(profileData);
+          }
         }
 
         // Fetch all seats
@@ -50,6 +64,7 @@ const SeatBooking: React.FC = () => {
           const userBookings = bookingsData?.filter(booking => booking.user_id === user.id) || [];
           setUserBookings(userBookings);
         }
+
         // Set default times
         const currentDate = new Date();
         currentDate.setMinutes(Math.ceil(currentDate.getMinutes() / 15) * 15);
@@ -80,8 +95,6 @@ const SeatBooking: React.FC = () => {
     setSelectedSeat(selectedSeat === seatId ? null : seatId);
   };
 
-
-
   const handleBookingTypeChange = (type: '2hours' | '4hours' | 'custom') => {
     setBookingType(type);
     
@@ -102,10 +115,6 @@ const SeatBooking: React.FC = () => {
     setStartTime(formatDateTimeForInput(newStartTime));
     setEndTime(formatDateTimeForInput(newEndTime));
   };
-
-//   const basePrice = (startTime: number, endTime: number): number => {
-//     return (endTime - startTime) / (1000 * 60);
-// };
 
   const isSeatAvailable = (seatId: string): boolean => {
     // Check if the seat is already booked during the selected time
@@ -131,6 +140,13 @@ const SeatBooking: React.FC = () => {
     return userBookings.some(booking => booking.seat_id === seatId);
   };
 
+  const calculatePrice = (startTime: string, endTime: string): number => {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const hours = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60));
+    return hours * 60; // 60 rubles per hour
+  };
+
   const handleBookSeat = async () => {
     if (!selectedSeat) {
       toast.error('Please select a seat');
@@ -154,10 +170,41 @@ const SeatBooking: React.FC = () => {
       toast.error('Start time must be in the future');
       return;
     }
+
+    // Calculate price
+    const price = calculatePrice(startTime, endTime);
+    const seatNumber = seats.find(seat => seat.id === selectedSeat)?.seat_number || 'Unknown Seat';
     
-    setSubmitting(true);
+    setProcessingPayment(true);
     
     try {
+      // Initiate Razorpay payment
+      const paymentResponse = await initiateRazorpayPayment({
+        amount: price * 100, // Convert to paise (1 ruble = 100 paise for this example)
+        currency: 'INR',
+        name: 'Mo-Library',
+        description: `Booking for ${seatNumber} from ${new Date(startTime).toLocaleString()} to ${new Date(endTime).toLocaleString()}`,
+        prefill: {
+          name: userProfile?.full_name || '',
+          email: userProfile?.email || '',
+        },
+        notes: {
+          seat_id: selectedSeat,
+          start_time: startTime,
+          end_time: endTime
+        },
+        theme: {
+          color: '#8b5cf6'
+        }
+      });
+
+      if (!paymentResponse.success) {
+        throw new Error(paymentResponse.error || 'Payment failed');
+      }
+
+      // If payment successful, create booking
+      setSubmitting(true);
+      
       const { error } = await supabase
         .from('bookings')
         .insert([
@@ -166,6 +213,8 @@ const SeatBooking: React.FC = () => {
             seat_id: selectedSeat,
             start_time: start.toISOString(),
             end_time: end.toISOString(),
+            payment_id: paymentResponse.data?.razorpay_payment_id,
+            amount_paid: price
           },
         ]);
       
@@ -190,6 +239,7 @@ const SeatBooking: React.FC = () => {
       toast.error(error.message || 'Failed to book seat');
     } finally {
       setSubmitting(false);
+      setProcessingPayment(false);
     }
   };
 
@@ -378,6 +428,11 @@ const SeatBooking: React.FC = () => {
                     <p className="text-xs text-gray-300 mt-1">
                       Ready to book for {new Date(startTime).toLocaleString()} to {new Date(endTime).toLocaleString()}
                     </p>
+                    {startTime && endTime && (
+                      <p className="text-sm font-medium text-primary mt-2">
+                        Price: ₹{calculatePrice(startTime, endTime)}
+                      </p>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -391,13 +446,16 @@ const SeatBooking: React.FC = () => {
               
               <button
                 onClick={handleBookSeat}
-                disabled={!selectedSeat || submitting}
-                className="w-full py-2 px-4 rounded-md gradient-bg text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!selectedSeat || submitting || processingPayment}
+                className="w-full py-2 px-4 rounded-md gradient-bg text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
-                {submitting ? (
+                {submitting || processingPayment ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
                 ) : (
-                  'Book Seat'
+                  <>
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Pay & Book Seat
+                  </>
                 )}
               </button>
               
@@ -411,6 +469,8 @@ const SeatBooking: React.FC = () => {
                   <li>• Maximum booking duration is 8 hours</li>
                   <li>• You can cancel a booking up to 1 hour before start time</li>
                   <li>• Please arrive on time for your booking</li>
+                  <li>• Payment is processed securely via Razorpay</li>
+                  <li>• Rate: ₹60 per hour (or part thereof)</li>
                 </ul>
               </div>
             </div>

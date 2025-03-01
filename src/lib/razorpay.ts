@@ -41,7 +41,7 @@ export const loadRazorpayScript = (): Promise<boolean> => {
       }
   
       const razorpayOptions = {
-        key: 'rzp_test_jsqgvaVFgCyNc0', // Test Key ID
+        key :process.env.RAZORPAY_TEST_KEY, // Test Key ID
         amount: options.amount,
         currency: options.currency || 'INR',
         name: options.name,

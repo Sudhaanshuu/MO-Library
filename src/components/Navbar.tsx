@@ -92,7 +92,7 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
     to="/"
     className="text-white hover:text-primary transition-colors flex items-center"
   >
-    <Home className="w-4 h-4 mr-1" />
+    <Home className="w-5 h-5 mr-3" />
     Home
   </Link>
   {session ? (
@@ -101,14 +101,14 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
         to="/dashboard"
         className="text-white hover:text-primary transition-colors flex items-center"
       >
-        <LayoutDashboard className="w-4 h-4 mr-1" />
+        <LayoutDashboard className="w-5 h-5 mr-3" />
         Dashboard
       </Link>
       <Link
         to="/seat-booking"
         className="text-white hover:text-primary transition-colors flex items-center"
       >
-        <CalendarCheck className="w-4 h-4 mr-1" />
+        <CalendarCheck className="w-5 h-5 mr-3" />
         Book a Seat
       </Link>
       {userIsAdmin && (
@@ -116,7 +116,7 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
           to="/admin"
           className="text-white hover:text-primary transition-colors flex items-center"
         >
-          <Shield className="w-4 h-4 mr-1" />
+          <Shield className="w-4 h-4 mr-3" />
           Admin
         </Link>
       )}

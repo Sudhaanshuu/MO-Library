@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase, isAdmin } from '../lib/supabase';
-import { BookOpen, Calendar, Clock, User, Search, Download, Filter, RefreshCw, DollarSign } from 'lucide-react';
+import { BookOpen, Calendar, Clock, User, Search, Download, Filter, RefreshCw, IndianRupee  } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import type { Booking } from '../lib/supabase';
@@ -126,7 +126,7 @@ const Admin: React.FC = () => {
 
   const exportToCSV = () => {
     // Create CSV content
-    const headers = ['User Name', 'Email', 'Seat', 'Start Time', 'End Time', 'Status', 'Price (₽)'];
+    const headers = ['User Name', 'Email', 'Seat', 'Start Time', 'End Time', 'Status', 'Price (Rs)'];
     const csvRows = [headers];
     
     filteredBookings.forEach(booking => {
@@ -242,15 +242,15 @@ const Admin: React.FC = () => {
           <div className="mb-6 p-4 bg-primary/10 border border-primary/30 rounded-lg">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <DollarSign className="h-6 w-6 text-primary mr-2" />
+                <IndianRupee className="h-6 w-6 text-primary mr-2" />
                 <h3 className="text-lg font-semibold">Revenue Summary</h3>
               </div>
               <div className="text-xl font-bold gradient-text">
-                ₽{filteredTotalRevenue.toLocaleString()}
+                Rs{filteredTotalRevenue.toLocaleString()}
               </div>
             </div>
             <p className="text-sm text-gray-300 mt-1">
-              Based on ₽60 per hour rate for all bookings
+              Based on Rs 60 per hour rate for all bookings
             </p>
           </div>
           
@@ -327,7 +327,7 @@ const Admin: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-white">
-                          ₽{calculatePrice(booking.start_time, booking.end_time)}
+                          Rs{calculatePrice(booking.start_time, booking.end_time)}
                         </div>
                       </td>
                     </tr>
@@ -349,7 +349,7 @@ const Admin: React.FC = () => {
               Total: {filteredBookings.length} bookings
             </div>
             <div className="text-sm font-medium text-primary">
-              Total Revenue: ₽{filteredTotalRevenue.toLocaleString()}
+              Total Revenue: Rs{filteredTotalRevenue.toLocaleString()}
             </div>
           </div>
         </motion.div>

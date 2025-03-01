@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase, isAdmin } from '../lib/supabase';
-import { BookOpen, Calendar, Clock, User, Search, Download, Filter, RefreshCw } from 'lucide-react';
+import { BookOpen, Calendar, Clock, User, Search, Download, Filter, RefreshCw, DollarSign } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import type { Booking } from '../lib/supabase';
@@ -11,6 +11,7 @@ const Admin: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'upcoming' | 'past'>('all');
+  const [totalRevenue, setTotalRevenue] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,6 +50,16 @@ const Admin: React.FC = () => {
       
       if (error) throw error;
       setBookings(data || []);
+      
+      // Calculate total revenue
+      let revenue = 0;
+      data?.forEach(booking => {
+        const startTime = new Date(booking.start_time);
+        const endTime = new Date(booking.end_time);
+        const hours = Math.ceil((endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60));
+        revenue += hours * 60; // 60 rubles per hour
+      });
+      setTotalRevenue(revenue);
     } catch (error: any) {
       toast.error(error.message || 'Failed to load bookings');
     } finally {
@@ -78,6 +89,13 @@ const Admin: React.FC = () => {
     return new Date(startTime) > new Date();
   };
 
+  const calculatePrice = (startTime: string, endTime: string) => {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const hours = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60));
+    return hours * 60; // 60 rubles per hour
+  };
+
   const filteredBookings = bookings
     .filter(booking => {
       // Apply search filter
@@ -102,9 +120,13 @@ const Admin: React.FC = () => {
       return matchesSearch && matchesStatus;
     });
 
+  const filteredTotalRevenue = filteredBookings.reduce((total, booking) => {
+    return total + calculatePrice(booking.start_time, booking.end_time);
+  }, 0);
+
   const exportToCSV = () => {
     // Create CSV content
-    const headers = ['User Name', 'Email', 'Seat', 'Start Time', 'End Time', 'Status'];
+    const headers = ['User Name', 'Email', 'Seat', 'Start Time', 'End Time', 'Status', 'Price (₽)'];
     const csvRows = [headers];
     
     filteredBookings.forEach(booking => {
@@ -114,7 +136,8 @@ const Admin: React.FC = () => {
         booking.seat?.seat_number || 'Unknown',
         new Date(booking.start_time).toLocaleString(),
         new Date(booking.end_time).toLocaleString(),
-        isUpcoming(booking.start_time) ? 'Upcoming' : 'Past'
+        isUpcoming(booking.start_time) ? 'Upcoming' : 'Past',
+        calculatePrice(booking.start_time, booking.end_time).toString()
       ];
       csvRows.push(row);
     });
@@ -215,6 +238,22 @@ const Admin: React.FC = () => {
             </div>
           </div>
           
+          {/* Revenue Summary */}
+          <div className="mb-6 p-4 bg-primary/10 border border-primary/30 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <DollarSign className="h-6 w-6 text-primary mr-2" />
+                <h3 className="text-lg font-semibold">Revenue Summary</h3>
+              </div>
+              <div className="text-xl font-bold gradient-text">
+                ₽{filteredTotalRevenue.toLocaleString()}
+              </div>
+            </div>
+            <p className="text-sm text-gray-300 mt-1">
+              Based on ₽60 per hour rate for all bookings
+            </p>
+          </div>
+          
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-700">
               <thead className="bg-background-light">
@@ -233,6 +272,9 @@ const Admin: React.FC = () => {
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Status
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Price
                   </th>
                 </tr>
               </thead>
@@ -283,11 +325,16 @@ const Admin: React.FC = () => {
                           {isUpcoming(booking.start_time) ? 'Upcoming' : 'Past'}
                         </span>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-white">
+                          ₽{calculatePrice(booking.start_time, booking.end_time)}
+                        </div>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center">
+                    <td colSpan={6} className="px-6 py-12 text-center">
                       <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-300">No bookings found</p>
                     </td>
@@ -297,8 +344,13 @@ const Admin: React.FC = () => {
             </table>
           </div>
           
-          <div className="mt-4 text-sm text-gray-400 text-right">
-            Total: {filteredBookings.length} bookings
+          <div className="mt-4 flex justify-between items-center">
+            <div className="text-sm text-gray-400">
+              Total: {filteredBookings.length} bookings
+            </div>
+            <div className="text-sm font-medium text-primary">
+              Total Revenue: ₽{filteredTotalRevenue.toLocaleString()}
+            </div>
           </div>
         </motion.div>
       </div>

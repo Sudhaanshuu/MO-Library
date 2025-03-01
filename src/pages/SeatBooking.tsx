@@ -50,7 +50,6 @@ const SeatBooking: React.FC = () => {
           const userBookings = bookingsData?.filter(booking => booking.user_id === user.id) || [];
           setUserBookings(userBookings);
         }
-
         // Set default times
         const currentDate = new Date();
         currentDate.setMinutes(Math.ceil(currentDate.getMinutes() / 15) * 15);
@@ -81,6 +80,8 @@ const SeatBooking: React.FC = () => {
     setSelectedSeat(selectedSeat === seatId ? null : seatId);
   };
 
+
+
   const handleBookingTypeChange = (type: '2hours' | '4hours' | 'custom') => {
     setBookingType(type);
     
@@ -101,6 +102,10 @@ const SeatBooking: React.FC = () => {
     setStartTime(formatDateTimeForInput(newStartTime));
     setEndTime(formatDateTimeForInput(newEndTime));
   };
+
+//   const basePrice = (startTime: number, endTime: number): number => {
+//     return (endTime - startTime) / (1000 * 60);
+// };
 
   const isSeatAvailable = (seatId: string): boolean => {
     // Check if the seat is already booked during the selected time

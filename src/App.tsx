@@ -18,6 +18,12 @@ import SeatBooking from './pages/SeatBooking';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
 import NotFound from './pages/NotFound';
+import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/ContactUs';
+import Pricing from './pages/Pricing';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsConditions from './pages/TermsConditions';
+import RefundPolicy from './pages/RefundPolicy';
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -62,6 +68,15 @@ function App() {
           <Route path="/seat-booking" element={session ? <SeatBooking /> : <Navigate to="/login" />} />
           <Route path="/profile" element={session ? <Profile /> : <Navigate to="/login" />} />
           <Route path="/admin" element={session ? <Admin /> : <Navigate to="/login" />} />
+          
+          {/* Legal and Info Pages */}
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/contact-us" element={<ContactUs />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-conditions" element={<TermsConditions />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

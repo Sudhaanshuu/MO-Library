@@ -50,8 +50,13 @@ const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/profile" className="text-gray-300 hover:text-primary transition-colors">
-                  Profile
+                <Link to="/about-us" className="text-gray-300 hover:text-primary transition-colors">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/pricing" className="text-gray-300 hover:text-primary transition-colors">
+                  Pricing
                 </Link>
               </li>
             </ul>
@@ -84,12 +89,28 @@ const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4 gradient-text">Contact</h3>
+            <h3 className="text-lg font-semibold mb-4 gradient-text">Legal</h3>
             <ul className="space-y-2">
-              <li className="text-gray-300">Library CGU</li>
-              <li className="text-gray-300">Retang, Mahura</li>
-              <li className="text-gray-300">sudhaanshuu@gmail.com</li>
-              <li className="text-gray-300">(+91) 8252228793</li>
+              <li>
+                <Link to="/privacy-policy" className="text-gray-300 hover:text-primary transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms-conditions" className="text-gray-300 hover:text-primary transition-colors">
+                  Terms & Conditions
+                </Link>
+              </li>
+              <li>
+                <Link to="/refund-policy" className="text-gray-300 hover:text-primary transition-colors">
+                  Refund Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact-us" className="text-gray-300 hover:text-primary transition-colors">
+                  Contact Us
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

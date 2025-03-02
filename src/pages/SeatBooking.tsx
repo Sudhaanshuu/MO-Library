@@ -20,6 +20,10 @@ const SeatBooking: React.FC = () => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [processingPayment, setProcessingPayment] = useState(false);
 
+  // Library operating hours
+  const OPENING_HOUR = 8; // 8 AM
+  const CLOSING_HOUR = 21; // 9 PM
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -65,15 +69,33 @@ const SeatBooking: React.FC = () => {
           setUserBookings(userBookings);
         }
 
-        // Set default times
+        // Set default times within operating hours
         const currentDate = new Date();
-        currentDate.setMinutes(Math.ceil(currentDate.getMinutes() / 15) * 15);
         
-        const defaultStartTime = new Date(currentDate);
-        defaultStartTime.setMinutes(defaultStartTime.getMinutes() + 15);
+        // Ensure start time is within operating hours
+        let defaultStartTime = new Date(currentDate);
+        defaultStartTime.setMinutes(Math.ceil(defaultStartTime.getMinutes() / 15) * 15);
         
-        const defaultEndTime = new Date(defaultStartTime);
+        // If current time is before opening, set to opening time
+        if (defaultStartTime.getHours() < OPENING_HOUR) {
+          defaultStartTime.setHours(OPENING_HOUR, 0, 0, 0);
+        }
+        
+        // If current time is after closing, set to next day opening
+        if (defaultStartTime.getHours() >= CLOSING_HOUR) {
+          defaultStartTime.setDate(defaultStartTime.getDate() + 1);
+          defaultStartTime.setHours(OPENING_HOUR, 0, 0, 0);
+        }
+        
+        // Calculate end time (2 hours later by default)
+        let defaultEndTime = new Date(defaultStartTime);
         defaultEndTime.setHours(defaultEndTime.getHours() + 2);
+        
+        // If end time exceeds closing time, cap at closing time
+        if (defaultEndTime.getHours() >= CLOSING_HOUR || 
+            (defaultEndTime.getHours() === CLOSING_HOUR - 1 && defaultEndTime.getMinutes() > 0)) {
+          defaultEndTime.setHours(CLOSING_HOUR, 0, 0, 0);
+        }
         
         setStartTime(formatDateTimeForInput(defaultStartTime));
         setEndTime(formatDateTimeForInput(defaultEndTime));
@@ -98,18 +120,37 @@ const SeatBooking: React.FC = () => {
   const handleBookingTypeChange = (type: '2hours' | '4hours' | 'custom') => {
     setBookingType(type);
     
+    // Get current date
     const currentDate = new Date();
-    currentDate.setMinutes(Math.ceil(currentDate.getMinutes() / 15) * 15);
     
-    const newStartTime = new Date(currentDate);
-    newStartTime.setMinutes(newStartTime.getMinutes() + 15);
+    // Set a default start time within operating hours
+    let newStartTime = new Date(currentDate);
+    newStartTime.setMinutes(Math.ceil(newStartTime.getMinutes() / 15) * 15);
     
-    const newEndTime = new Date(newStartTime);
+    // If current time is before opening, set to opening time
+    if (newStartTime.getHours() < OPENING_HOUR) {
+      newStartTime.setHours(OPENING_HOUR, 0, 0, 0);
+    }
+    
+    // If current time is after closing, set to next day opening
+    if (newStartTime.getHours() >= CLOSING_HOUR) {
+      newStartTime.setDate(newStartTime.getDate() + 1);
+      newStartTime.setHours(OPENING_HOUR, 0, 0, 0);
+    }
+    
+    // Calculate end time based on booking type
+    let newEndTime = new Date(newStartTime);
     
     if (type === '2hours') {
       newEndTime.setHours(newEndTime.getHours() + 2);
     } else if (type === '4hours') {
       newEndTime.setHours(newEndTime.getHours() + 4);
+    }
+    
+    // If end time exceeds closing time, cap at closing time
+    if (newEndTime.getHours() >= CLOSING_HOUR || 
+        (newEndTime.getHours() === CLOSING_HOUR - 1 && newEndTime.getMinutes() > 0)) {
+      newEndTime.setHours(CLOSING_HOUR, 0, 0, 0);
     }
     
     setStartTime(formatDateTimeForInput(newStartTime));
@@ -147,6 +188,35 @@ const SeatBooking: React.FC = () => {
     return hours * 60; // 60 rubles per hour
   };
 
+  const validateBookingTime = (start: Date, end: Date): { valid: boolean; message?: string } => {
+    // Check if start time is before end time
+    if (start >= end) {
+      return { valid: false, message: 'End time must be after start time' };
+    }
+    
+    // Check if start time is in the future
+    if (start < new Date()) {
+      return { valid: false, message: 'Start time must be in the future' };
+    }
+    
+    // Check if booking is within operating hours
+    if (start.getHours() < OPENING_HOUR) {
+      return { valid: false, message: `Library opens at ${OPENING_HOUR}:00 AM` };
+    }
+    
+    if (end.getHours() >= CLOSING_HOUR || (end.getHours() === CLOSING_HOUR && end.getMinutes() > 0)) {
+      return { valid: false, message: `Library closes at ${CLOSING_HOUR}:00 PM` };
+    }
+    
+    // Check if booking duration is reasonable (e.g., max 8 hours)
+    const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    if (durationHours > 8) {
+      return { valid: false, message: 'Maximum booking duration is 8 hours' };
+    }
+    
+    return { valid: true };
+  };
+
   const handleBookSeat = async () => {
     if (!selectedSeat) {
       toast.error('Please select a seat');
@@ -161,15 +231,13 @@ const SeatBooking: React.FC = () => {
     const start = new Date(startTime);
     const end = new Date(endTime);
     
-    if (start >= end) {
-      toast.error('End time must be after start time');
+    // Validate booking time
+    const validation = validateBookingTime(start, end);
+    if (!validation.valid) {
+      toast.error(validation.message ?? "An error occurred");
       return;
     }
     
-    if (start < new Date()) {
-      toast.error('Start time must be in the future');
-      return;
-    }
 
     // Calculate price
     const price = calculatePrice(startTime, endTime);
@@ -241,6 +309,13 @@ const SeatBooking: React.FC = () => {
       setSubmitting(false);
       setProcessingPayment(false);
     }
+  };
+
+  // Format time for display
+  const formatTimeDisplay = (hour: number) => {
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+    return `${displayHour}:00 ${period}`;
   };
 
   if (loading) {
@@ -380,65 +455,46 @@ const SeatBooking: React.FC = () => {
                 </div>
               </div>
               
-<div>
-  <label htmlFor="startTime" className="block text-sm font-medium text-gray-300 mb-2">
-    Start Time
-  </label>
-  <div className="relative">
-    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-      <Calendar className="h-5 w-5 text-gray-400" />
-    </div>
-    <input
-      id="startTime"
-      type="datetime-local"
-      value={startTime}
-      onChange={(e) => {
-        const selectedTime = new Date(e.target.value);
-        const hours = selectedTime.getHours();
-        const minutes = selectedTime.getMinutes();
-        
-        // Check if time is between 8:00 AM and 10:00 PM
-        if ((hours > 8 || (hours === 8 && minutes >= 0)) && (hours < 22)) {
-          setStartTime(e.target.value);
-        } else {
-          toast.error("Please select a time between 8:00 AM and 10:00 PM");
-        }
-      }}
-      className="block w-full pl-10 pr-3 py-2 rounded-md bg-background-light border border-gray-700 focus:ring-primary focus:border-primary text-white"
-      min={formatDateTimeForInput(new Date())}
-    />
-  </div>
-</div>
-
-<div>
-  <label htmlFor="endTime" className="block text-sm font-medium text-gray-300 mb-2">
-    End Time
-  </label>
-  <div className="relative">
-    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-      <Clock className="h-5 w-5 text-gray-400" />
-    </div>
-    <input
-      id="endTime"
-      type="datetime-local"
-      value={endTime}
-      onChange={(e) => {
-        const selectedTime = new Date(e.target.value);
-        const hours = selectedTime.getHours();
-        const minutes = selectedTime.getMinutes();
-        
-        // Check if time is between 8:00 AM and 10:00 PM
-        if ((hours > 8 || (hours === 8 && minutes >= 0)) && (hours < 22 || (hours === 22 && minutes === 0))) {
-          setEndTime(e.target.value);
-        } else {
-          toast.error("Please select a time between 8:00 AM and 10:00 PM");
-        }
-      }}
-      className="block w-full pl-10 pr-3 py-2 rounded-md bg-background-light border border-gray-700 focus:ring-primary focus:border-primary text-white"
-      min={startTime}
-    />
-  </div>
-</div>
+              <div>
+                <label htmlFor="startTime" className="block text-sm font-medium text-gray-300 mb-2">
+                  Start Time
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Calendar className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="startTime"
+                    type="datetime-local"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-2 rounded-md bg-background-light border border-gray-700 focus:ring-primary focus:border-primary text-white"
+                    min={formatDateTimeForInput(new Date())}
+                  />
+                </div>
+                <p className="mt-1 text-xs text-gray-400">
+                  Library hours: {formatTimeDisplay(OPENING_HOUR)} - {formatTimeDisplay(CLOSING_HOUR)}
+                </p>
+              </div>
+              
+              <div>
+                <label htmlFor="endTime" className="block text-sm font-medium text-gray-300 mb-2">
+                  End Time
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Clock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="endTime"
+                    type="datetime-local"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-2 rounded-md bg-background-light border border-gray-700 focus:ring-primary focus:border-primary text-white"
+                    min={startTime}
+                  />
+                </div>
+              </div>
               
               {selectedSeat ? (
                 <div className="p-4 bg-primary/10 border border-primary/30 rounded-md flex items-start">
@@ -489,6 +545,7 @@ const SeatBooking: React.FC = () => {
                 <ul className="text-xs text-gray-300 space-y-1">
                   <li>• Bookings can be made up to 7 days in advance</li>
                   <li>• Maximum booking duration is 8 hours</li>
+                  <li>• Library hours: {formatTimeDisplay(OPENING_HOUR)} - {formatTimeDisplay(CLOSING_HOUR)}</li>
                   <li>• You can cancel a booking up to 1 hour before start time</li>
                   <li>• Please arrive on time for your booking</li>
                   <li>• Payment is processed securely via Razorpay</li>

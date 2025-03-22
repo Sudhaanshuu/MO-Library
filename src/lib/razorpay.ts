@@ -1,4 +1,4 @@
-// Razorpay integration utilities
+// lib/razorpay.ts
 export const loadRazorpayScript = (): Promise<boolean> => {
   return new Promise((resolve) => {
     const script = document.createElement('script');
@@ -10,11 +10,10 @@ export const loadRazorpayScript = (): Promise<boolean> => {
 };
 
 export interface PaymentOptions {
-  amount: number; // in paise (100 paise = 1 INR)
+  amount: number;
   currency: string;
   name: string;
   description: string;
-  orderId?: string;
   prefill?: {
     name?: string;
     email?: string;
@@ -41,12 +40,11 @@ export const initiateRazorpayPayment = (
     }
 
     const razorpayOptions = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Using environment variable
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
       amount: options.amount,
       currency: options.currency || 'INR',
       name: options.name,
       description: options.description,
-      order_id: options.orderId,
       handler: function (response: any) {
         resolve({
           success: true,

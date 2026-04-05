@@ -5,9 +5,11 @@ import { BookOpen, User, Search, Download, Filter, RefreshCw, IndianRupee, Plus,
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import type { Booking, Book } from '../lib/supabase';
+import QuizManager from '../components/QuizManager';
+import LearningPathManager from '../components/LearningPathManager';
 
 const Admin: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'bookings' | 'books'>('bookings');
+  const [activeTab, setActiveTab] = useState<'bookings' | 'books' | 'quizzes' | 'paths'>('bookings');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
@@ -212,7 +214,7 @@ const Admin: React.FC = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex justify-center mb-8 gap-4">
+        <div className="flex justify-center mb-8 gap-4 flex-wrap">
           <button
             onClick={() => setActiveTab('bookings')}
             className={`px-6 py-3 rounded-lg font-semibold transition-all ${
@@ -221,7 +223,7 @@ const Admin: React.FC = () => {
                 : 'glass-effect text-gray-600 dark:text-gray-300 hover:bg-primary/20'
             }`}
           >
-            Bookings Management
+            Bookings
           </button>
           <button
             onClick={() => setActiveTab('books')}
@@ -231,7 +233,27 @@ const Admin: React.FC = () => {
                 : 'glass-effect text-gray-600 dark:text-gray-300 hover:bg-primary/20'
             }`}
           >
-            Books Management
+            Books
+          </button>
+          <button
+            onClick={() => setActiveTab('quizzes')}
+            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              activeTab === 'quizzes'
+                ? 'gradient-bg text-white'
+                : 'glass-effect text-gray-600 dark:text-gray-300 hover:bg-primary/20'
+            }`}
+          >
+            Quizzes
+          </button>
+          <button
+            onClick={() => setActiveTab('paths')}
+            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              activeTab === 'paths'
+                ? 'gradient-bg text-white'
+                : 'glass-effect text-gray-600 dark:text-gray-300 hover:bg-primary/20'
+            }`}
+          >
+            Learning Paths
           </button>
         </div>
 
@@ -491,6 +513,28 @@ const Admin: React.FC = () => {
                 <p className="text-gray-600 dark:text-gray-300 mb-6">Start building your library collection</p>
               </div>
             )}
+          </motion.div>
+        )}
+
+        {/* Quizzes Tab */}
+        {activeTab === 'quizzes' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <QuizManager />
+          </motion.div>
+        )}
+
+        {/* Learning Paths Tab */}
+        {activeTab === 'paths' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <LearningPathManager />
           </motion.div>
         )}
 

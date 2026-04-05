@@ -32,6 +32,7 @@ import BookDetails from './pages/BookDetails';
 import MyReading from './pages/MyReading';
 import LearningPaths from './pages/LearningPaths';
 import LearningPathDetail from './pages/LearningPathDetail';
+import Quiz from './pages/Quiz';
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -83,6 +84,7 @@ function App() {
           <Route path="/my-reading" element={session ? <MyReading /> : <Navigate to="/login" />} />
           <Route path="/learning-paths" element={session ? <LearningPaths /> : <Navigate to="/login" />} />
           <Route path="/learning-path/:id" element={session ? <LearningPathDetail /> : <Navigate to="/login" />} />
+          <Route path="/quiz/:bookId" element={session ? <Quiz /> : <Navigate to="/login" />} />
           <Route path="/book-request" element={<BookRequest />} />
           
           {/* Legal and Info Pages */}

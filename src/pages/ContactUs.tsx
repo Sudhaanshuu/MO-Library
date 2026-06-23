@@ -221,7 +221,7 @@ const ContactUs: React.FC = () => {
               <h2 className="text-xl font-bold mb-4">Find Us</h2>
               <div className="w-full h-[300px] rounded-lg overflow-hidden">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3672.8219652911444!2d72.54993641496726!3d23.019996384952738!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e84576560d99d%3A0x7c5bd29b9eefccd5!2sAhmedabad%20University!5e0!3m2!1sen!2sin!4v1651234567890!5m2!1sen!2sin"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3743.9102000338185!2d85.7334647741467!3d20.22105231503194!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a19a8fa59ac3c81%3A0xc81fc475faa77274!2sC.%20V.%20Raman%20Global%20University!5e0!3m2!1sen!2sin!4v1782197558747!5m2!1sen!2sin"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}

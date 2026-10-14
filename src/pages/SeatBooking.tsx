@@ -122,15 +122,20 @@ const SeatBooking: React.FC = () => {
   }, []);
 
   const getStartDateTime = (): Date => {
-    const date = new Date(bookingDate);
-    date.setHours(parseInt(startHour) || 0, parseInt(startMinute) || 0, 0, 0);
-    return date;
+    // Parse date string properly to avoid timezone issues
+    // bookingDate format: "YYYY-MM-DD"
+    const [year, month, day] = bookingDate.split('-').map(Number);
+    // month is 0-indexed in JavaScript Date
+    const localDate = new Date(year, month - 1, day, parseInt(startHour) || 0, parseInt(startMinute) || 0, 0, 0);
+    return localDate;
   };
 
   const getEndDateTime = (): Date => {
-    const date = new Date(bookingDate);
-    date.setHours(parseInt(endHour) || 0, parseInt(endMinute) || 0, 0, 0);
-    return date;
+    // Parse date string properly to avoid timezone issues
+    const [year, month, day] = bookingDate.split('-').map(Number);
+    // month is 0-indexed in JavaScript Date
+    const localDate = new Date(year, month - 1, day, parseInt(endHour) || 0, parseInt(endMinute) || 0, 0, 0);
+    return localDate;
   };
 
   const handleSeatSelect = (seatId: string) => {
@@ -224,10 +229,35 @@ const SeatBooking: React.FC = () => {
     const start = getStartDateTime();
     const end = getEndDateTime();
     
+    // Debug: Log the times being used
+    console.log('Booking times:', {
+      start: start.toISOString(),
+      end: end.toISOString(),
+      startLocal: start.toLocaleString(),
+      endLocal: end.toLocaleString(),
+    });
+    
     // Validate booking time
     const validation = validateBookingTime(start, end);
     if (!validation.valid) {
       toast.error(validation.message ?? "An error occurred");
+      return;
+    }
+    
+    // Double-check seat availability before payment (client-side pre-check)
+    if (!isSeatAvailable(selectedSeat)) {
+      toast.error('This seat is no longer available for the selected time. Please choose another seat or time.');
+      
+      // Refresh bookings
+      const { data: refreshedBookings } = await supabase
+        .from('bookings')
+        .select('*')
+        .gte('end_time', new Date().toISOString());
+      
+      if (refreshedBookings) {
+        setBookings(refreshedBookings);
+      }
+      
       return;
     }
     
@@ -278,7 +308,25 @@ const SeatBooking: React.FC = () => {
           },
         ]);
       
-      if (error) throw error;
+      if (error) {
+        // Check if it's a double booking error
+        if (error.message && error.message.includes('already booked')) {
+          toast.error('This seat was just booked by someone else. Please select a different seat or time.');
+          
+          // Refresh bookings to show updated availability
+          const { data: refreshedBookings } = await supabase
+            .from('bookings')
+            .select('*')
+            .gte('end_time', new Date().toISOString());
+          
+          if (refreshedBookings) {
+            setBookings(refreshedBookings);
+          }
+          
+          return;
+        }
+        throw error;
+      }
       
       toast.success('Seat booked successfully!');
       
@@ -561,7 +609,9 @@ const SeatBooking: React.FC = () => {
                     <p className="text-xs text-gray-300 mt-1">
                       {bookingDate && startHour && endHour && (
                         <>
-                          {bookingDate} at {startHour}:{startMinute || '00'} - {endHour}:{endMinute || '00'}
+                          {new Date(parseInt(bookingDate.split('-')[0]), parseInt(bookingDate.split('-')[1]) - 1, parseInt(bookingDate.split('-')[2]), parseInt(startHour), parseInt(startMinute || '0')).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                          <br />
+                          {startHour.padStart(2, '0')}:{(startMinute || '00').padStart(2, '0')} - {endHour.padStart(2, '0')}:{(endMinute || '00').padStart(2, '0')}
                         </>
                       )}
                     </p>

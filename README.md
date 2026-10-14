@@ -148,19 +148,40 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
 ```
 
-### 4. Database Setup
-Run the SQL migrations in your Supabase SQL editor:
-- Navigate to `supabase/migrations/` folder
-- Execute each migration file in order
+### 4. Database Setup (One-Click Migration)
+Set up the entire database in one step:
+1. Go to your [Supabase Dashboard](https://supabase.com/dashboard)
+2. In the left sidebar, click **SQL Editor** -> **+ New query**
+3. Open [`supabase/complete_database.sql`](supabase/complete_database.sql) (or `supabase/schema.sql`)
+4. Copy the entire content and paste it into the SQL Editor
+5. Click **Run** (or press `Ctrl+Enter`)
 
-### 5. Run Development Server
+That's it! All 14 tables, performance indexes, RLS security policies, triggers, double-booking prevention, avatar storage bucket, and sample books/quizzes/roadmaps are automatically created.
+
+### 5. Setup an Admin Account
+To grant an account full administrator access (manage books, quizzes, learning paths, view all bookings, etc.):
+
+1. **Create an account** via the web app (`/signup`) or in Supabase Auth (**Authentication -> Users -> Add User**)
+2. Open the **SQL Editor** in Supabase and run:
+   ```sql
+   UPDATE public.profiles
+   SET is_admin = true
+   WHERE email = 'your-email@example.com';
+   ```
+3. **Verify the change**:
+   ```sql
+   SELECT id, email, full_name, is_admin FROM public.profiles WHERE is_admin = true;
+   ```
+4. Log into the app with that email and password, then navigate to `/admin`!
+
+### 6. Run Development Server
 ```bash
 npm run dev
 ```
 
 The application will be available at `http://localhost:5173`
 
-### 6. Build for Production
+### 7. Build for Production
 ```bash
 npm run build
 ```
@@ -193,7 +214,9 @@ mo-library/
 │   ├── main.tsx         # Entry point
 │   └── index.css        # Global styles
 ├── supabase/
-│   └── migrations/      # Database migrations
+│   ├── complete_database.sql # Consolidated single-run database setup script
+│   ├── schema.sql            # Master schema file
+│   └── migrations/           # Versioned migrations & archive
 ├── public/              # Static assets
 └── package.json
 ```
